@@ -56,7 +56,7 @@ object Encoding {
         key1.asJson,
         key2.asJson
       ))
-    case FnGetAttr(logicalId, attr) =>
+    case FnGetAtt(logicalId, attr) =>
       Json.obj("Fn::GetAtt" -> Json.arr(
         Json.fromString(logicalId),
         Json.fromString(attr)))

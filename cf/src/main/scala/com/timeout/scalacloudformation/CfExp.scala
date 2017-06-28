@@ -49,15 +49,15 @@ object CfExp {
   case class FnNot(cond: E[Boolean]) extends E[Boolean]
   case class FnOr(conds: E[Boolean]*) extends E[Boolean]
 
-  case class FnGetAttr private [scalacloudformation](logicalId: String,
-                                                     attributeName: String) extends E[String]
+  case class FnGetAtt private [scalacloudformation](logicalId: String,
+                                                    attributeName: String) extends E[String]
 
-  object FnGetAttr {
-    def unsafe(v: HasLogicalId, attributeName: String) = FnGetAttr(v.logicalId, attributeName)
+  object FnGetAtt {
+    def unsafe(v: HasLogicalId, attributeName: String) = FnGetAtt(v.logicalId, attributeName)
 
     def apply[R <: Resource](resource: R, w: Witness)
-                            (implicit hasGetAtt: HasGetAtt[R, w.T]): FnGetAttr =
-      FnGetAttr(resource.logicalId, hasGetAtt.attributeName)
+                            (implicit hasGetAtt: HasGetAtt[R, w.T]): FnGetAtt =
+      FnGetAtt(resource.logicalId, hasGetAtt.attributeName)
   }
 
   case class FnFindInMap(mapName: Mapping,

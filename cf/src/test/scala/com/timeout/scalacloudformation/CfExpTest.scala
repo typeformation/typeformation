@@ -187,6 +187,18 @@ class CfExpTest extends FreeSpec with Matchers {
       """.stripMargin)
   }
 
+  "FnGetAt is handled" in {
+    //Note: These implicit values are created at macro expansion time
+    implicit val testResourceAttr1 = HasGetAtt.mk[TestResource]("attr1")
+    implicit val testResourceAttr2 = HasGetAtt.mk[TestResource]("attr2")
+
+    val res = TestResource(logicalId = "ID", foo = Lit("bar"))
+
+    assertCompiles("""CfExp.FnGetAtt(res, "attr1")""")
+    assertCompiles("""CfExp.FnGetAtt(res, "attr2")""")
+    assertDoesNotCompile("""FnGetAtt(res, "attr3")""")
+  }
+
   "Resource Ref is handled" in {
     val resource = TestResource("referenced", Lit("foo"))
 
