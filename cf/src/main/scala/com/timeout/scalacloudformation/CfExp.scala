@@ -27,7 +27,7 @@ object CfExp {
     implicit val jsonLit: IsLit[Json] = new IsLit[Json] {}
     implicit val durationLit: IsLit[Duration] = new IsLit[Duration] {}
     implicit def propertyLit[T <: ResourceProperty]: IsLit[T] = new IsLit[T] {}
-    implicit def listLit[A: IsLit]: IsLit[List[A]] = new IsLit[List[A]]{}
+    implicit def listLit[T: IsLit]: IsLit[List[T]] = new IsLit[List[T]]{}
   }
 
   case class Lit[T: IsLit](value: T) extends E[T]
@@ -49,12 +49,18 @@ object CfExp {
   case class FnNot(cond: E[Boolean]) extends E[Boolean]
   case class FnOr(conds: E[Boolean]*) extends E[Boolean]
 
-  case class FnGetAtt private [scalacloudformation](logicalId: String,
-                                                    attributeName: String) extends E[String]
+  case class FnSelect[T](index: Int, values: E[List[T]]) extends E[T]
 
+  /** We might want to implement this as a type-safe string interpolator checking that
+    * the variable names match either a pseudo param (e.g. AWS::Region)
+    * or one of the supplied mappings
+    */
+  case class FnSub(string: String,
+                   mappings: Option[Map[String, CfExp[String]]] = None) extends E[String]
+
+  case class FnGetAtt(logicalId: String, attributeName: String) extends E[String]
   object FnGetAtt {
     def unsafe(v: HasLogicalId, attributeName: String) = FnGetAtt(v.logicalId, attributeName)
-
     def apply[R <: Resource](resource: R, w: Witness)
                             (implicit hasGetAtt: HasGetAtt[R, w.T]): FnGetAtt =
       FnGetAtt(resource.logicalId, hasGetAtt.attributeName)
@@ -64,8 +70,8 @@ object CfExp {
                          topLevelKey: CfExp[String],
                          secondLevelKey: CfExp[String]) extends E[String]
 
-  case class FnJoin private[scalacloudformation](delimiter: String,
-                                                 values: List[Json]) extends E[String]
+  case class FnJoin(delimiter: String,
+                    values: List[Json]) extends E[String]
 
   object FnJoin {
     import shapeless._

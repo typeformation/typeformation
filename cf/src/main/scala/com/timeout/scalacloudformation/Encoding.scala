@@ -27,13 +27,10 @@ object Encoding {
       )
     }
 
-  implicit def encodeLit[T: Encoder]: Encoder[Lit[T]] =
+  implicit def encodeLit[T : IsLit : Encoder]: Encoder[Lit[T]] =
     implicitly[Encoder[T]].contramap[Lit[T]](_.value)
 
-  implicit def encodeCfExp[T](
-    implicit
-    ev: Encoder[Lit[T]]
-  ): Encoder[CfExp[T]] = Encoder.instance[CfExp[T]] {
+  implicit def encodeCfExp[T: IsLit : Encoder]: Encoder[CfExp[T]] = Encoder.instance[CfExp[T]] {
     case l: Lit[T] =>
       l.asJson
     case FnBase64(exp) =>
@@ -56,6 +53,20 @@ object Encoding {
         key1.asJson,
         key2.asJson
       ))
+    case FnSelect(index, values) =>
+      Json.obj("Fn::Select" -> Json.arr(
+        Json.fromInt(index),
+        values.asJson
+      ))
+    case FnSub(str, mappings) =>
+      Json.obj("Fn::Sub" ->
+        mappings.fold(Json.fromString(str))(m =>
+          Json.arr(
+            Json.fromString(str),
+            m.asJson
+          )
+        )
+      )
     case FnGetAtt(logicalId, attr) =>
       Json.obj("Fn::GetAtt" -> Json.arr(
         Json.fromString(logicalId),

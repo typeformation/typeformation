@@ -127,7 +127,7 @@ class CodeGen(conf: CodeGen.Config) {
     case p: PrimitiveType =>
       t"CfExp[${mapPrimitiveType(p)}]"
     case TagType =>
-      t"CfExp[Tag]"
+      t"Tag"
     case PropertyTypeRef(_, name) =>
       val fqn = namespace.fold(name) { ns: String => s"$ns.$name" }
       Type.Name(fqn)

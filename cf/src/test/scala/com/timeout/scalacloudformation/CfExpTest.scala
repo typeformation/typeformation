@@ -156,6 +156,7 @@ class CfExpTest extends FreeSpec with Matchers {
         |  }
         |}
       """.stripMargin)
+
     Right(actual) should ===(expJson)
   }
 
@@ -185,18 +186,41 @@ class CfExpTest extends FreeSpec with Matchers {
         |  }
         |}
       """.stripMargin)
+
+    Right(actual) should === (expJson)
   }
 
-  "FnGetAt is handled" in {
-    //Note: These implicit values are created at macro expansion time
-    implicit val testResourceAttr1 = HasGetAtt.mk[TestResource]("attr1")
-    implicit val testResourceAttr2 = HasGetAtt.mk[TestResource]("attr2")
+  "FnSelect is handled" in {
+    val exp: CfExp[String] = FnSelect(2, Lit(List("foo", "bar")))
+    val expJson = parse(
+      """
+        |{
+        |  "Fn::Select" : [
+        |    2,
+        |    [
+        |     "foo",
+        |     "bar"
+        |    ]
+        |  ]
+        |}
+      """.stripMargin)
+    Right(exp.asJson) should ===(expJson)
+  }
 
-    val res = TestResource(logicalId = "ID", foo = Lit("bar"))
+  "FnSub is handled" in {
+    val varNameParam = Parameter.Str("myParam")
+    val exp: CfExp[String] = FnSub("Hello ${x}", mappings = Some(Map("x" -> varNameParam.ref)))
 
-    assertCompiles("""CfExp.FnGetAtt(res, "attr1")""")
-    assertCompiles("""CfExp.FnGetAtt(res, "attr2")""")
-    assertDoesNotCompile("""FnGetAtt(res, "attr3")""")
+    val expJson = parse("""
+        |{
+        |  "Fn::Sub" : [
+        |    "Hello ${x}",
+        |    {"x": { "Ref": "myParam" }}
+        |  ]
+        |}
+      """.stripMargin)
+
+    Right(exp.asJson) should === (expJson)
   }
 
   "Resource Ref is handled" in {
@@ -239,5 +263,24 @@ class CfExpTest extends FreeSpec with Matchers {
       """.stripMargin)
 
     Right(actual) should ===(expJson)
+  }
+
+  "FnGetAtt" - {
+    val res = TestResource(logicalId = "ID", foo = Lit("bar"))
+
+    //Note: These implicit values are created at macro expansion time
+    implicit val testResourceAttr1 = HasGetAtt.mk[TestResource]("attr1")
+    implicit val testResourceAttr2 = HasGetAtt.mk[TestResource]("attr2")
+
+    "statically checks attribute names" in {
+      assertCompiles("""FnGetAtt(res, "attr1")""")
+      assertCompiles("""FnGetAtt(res, "attr2")""")
+      assertDoesNotCompile("""FnGetAtt(res, "attr3")""")
+    }
+    "is handled" in {
+      val expJson = parse("""{ "Fn::GetAtt": ["ID", "attr1"] } """)
+      val exp: CfExp[String] = FnGetAtt(res, "attr1")
+      Right(exp.asJson) should ===(expJson)
+    }
   }
 }
