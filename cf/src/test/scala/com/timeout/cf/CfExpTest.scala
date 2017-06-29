@@ -1,6 +1,6 @@
-package com.timeout.scalacloudformation
+package com.timeout.cf
 
-import com.timeout.scalacloudformation.CfExp._
+import com.timeout.cf.CfExp._
 import io.circe.parser._
 import io.circe.syntax._
 import org.scalatest.{FreeSpec, Matchers}
@@ -22,12 +22,13 @@ object CfExpTest {
     override val UpdatePolicy = None
     override val DeletionPolicy = None
     override val CreationPolicy = None
+    override val Metadata = None
   }
 
   implicit val enc = Encoder.instance[TestResource](_.jsonEncode)
 }
 
-import com.timeout.scalacloudformation.CfExpTest._
+import com.timeout.cf.CfExpTest._
 
 class CfExpTest extends FreeSpec with Matchers {
   "Literals are handled" in {
@@ -112,18 +113,18 @@ class CfExpTest extends FreeSpec with Matchers {
     val expJson = parse(exp)
 
     val actual = TestResource(
-      logicalId = "Logical ID", foo = FnIf(
-        FnEquals(
-          FnAnd(
-            Lit(true),
-            FnNot(
-              Lit(true)
+      logicalId = "Logical ID", foo = fnIf(
+        fnEquals(
+          fnAnd(
+            lit(true),
+            fnNot(
+              lit(true)
             )
           ),
-          FnOr(Lit(true), Lit(false))
+          fnOr(lit(true), lit(false))
         ),
-        Lit("a"),
-        Lit("b")
+        lit("a"),
+        lit("b")
       )
     ).asJson
 
@@ -136,7 +137,7 @@ class CfExpTest extends FreeSpec with Matchers {
     )
 
     val actual = TestResource(
-      logicalId = "ID", foo = FnFindInMap(m, PseudoParameter.Region.ref, Lit("X"))
+      logicalId = "ID", foo = fnFindInMap(m, PseudoParameter.Region.ref, lit("X"))
     ).asJson
 
     val expJson = parse(
@@ -161,8 +162,8 @@ class CfExpTest extends FreeSpec with Matchers {
   }
 
   "Join function is handled" in {
-     val tuple: (CfExp[String], CfExp[String], CfExp[Int]) = (
-      PseudoParameter.AccountId.ref, PseudoParameter.StackName.ref, Lit(1)
+     val tuple = (
+      PseudoParameter.AccountId.ref, PseudoParameter.StackName.ref, lit(1)
     )
 
     val actual = TestResource(
@@ -191,7 +192,7 @@ class CfExpTest extends FreeSpec with Matchers {
   }
 
   "FnSelect is handled" in {
-    val exp: CfExp[String] = FnSelect(2, Lit(List("foo", "bar")))
+    val exp = fnSelect(2, lit(List("foo", "bar")))
     val expJson = parse(
       """
         |{
@@ -209,13 +210,44 @@ class CfExpTest extends FreeSpec with Matchers {
 
   "FnSub is handled" in {
     val varNameParam = Parameter.Str("myParam")
-    val exp: CfExp[String] = FnSub("Hello ${x}", mappings = Some(Map("x" -> varNameParam.ref)))
+    val exp = fnSub("Hello ${x}", mappings = Some(Map("x" -> varNameParam.ref)))
 
     val expJson = parse("""
         |{
         |  "Fn::Sub" : [
         |    "Hello ${x}",
         |    {"x": { "Ref": "myParam" }}
+        |  ]
+        |}
+      """.stripMargin)
+
+    Right(exp.asJson) should === (expJson)
+  }
+
+  "FnSplit is handled" in {
+    val exp = fnSelect(2, fnSplit("/", lit("foo/bar/baz")))
+
+    val expJson = parse(
+      """
+        |{
+        |  "Fn::Select" : [
+        |    2,
+        |    { "Fn::Split" : ["/", "foo/bar/baz"] }
+        |  ]
+        |}
+      """.stripMargin)
+
+    Right(exp.asJson) should === (expJson)
+  }
+
+  "FnGetAZs is supported" in {
+    val exp = fnSelect(2, fnGetAZs(Some("eu-west-1")))
+    val expJson = parse(
+      """
+        |{
+        |  "Fn::Select" : [
+        |    2,
+        |    { "Fn::GetAZs" : "eu-west-1" }
         |  ]
         |}
       """.stripMargin)
@@ -266,7 +298,7 @@ class CfExpTest extends FreeSpec with Matchers {
   }
 
   "FnGetAtt" - {
-    val res = TestResource(logicalId = "ID", foo = Lit("bar"))
+    val res = TestResource(logicalId = "ID", foo = lit("bar"))
 
     //Note: These implicit values are created at macro expansion time
     implicit val testResourceAttr1 = HasGetAtt.mk[TestResource]("attr1")

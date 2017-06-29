@@ -62,9 +62,10 @@ class CodeGen(conf: CodeGen.Config) {
       val deletionPolicy: Term.Param = param"DeletionPolicy: Option[DeletionPolicy] = None"
       val creationPolicy: Term.Param = param"CreationPolicy: Option[CreationPolicy] = None"
       val updatePolicy: Term.Param = param"UpdatePolicy: Option[UpdatePolicy] = None"
+      val metadata: Term.Param = param"Metadata: Option[Json] = None"
 
       val commonProps =
-        logicalIdProp :: dependsOn :: creationPolicy :: deletionPolicy :: updatePolicy :: Nil
+        logicalIdProp :: dependsOn :: creationPolicy :: deletionPolicy :: updatePolicy :: metadata :: Nil
 
       val properties = commonProps ++ rt.properties.map(mkField(_, Some(namespace)))
       val fqn = Term.Name("\"" + rt.fqn + "\"")
@@ -84,7 +85,8 @@ class CodeGen(conf: CodeGen.Config) {
                  "UpdatePolicy" -> UpdatePolicy.asJson,
                  "DeletionPolicy" -> DeletionPolicy.asJson,
                  "CreationPolicy" -> CreationPolicy.asJson,
-                 "Properties" -> Json.obj(..$jsonFields)
+                 "Properties" -> Json.obj(..$jsonFields),
+                 "Metadata" -> Metadata.asJson
                )
              )
          }

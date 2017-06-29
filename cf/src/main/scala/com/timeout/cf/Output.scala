@@ -1,4 +1,4 @@
-package com.timeout.scalacloudformation
+package com.timeout.cf
 
 case class Output(logicalId: String,
                   Value: CfExp[String],

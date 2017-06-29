@@ -1,10 +1,10 @@
-package com.timeout.scalacloudformation
+package com.timeout.cf
 
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-import com.timeout.scalacloudformation.CfExp._
-import com.timeout.scalacloudformation.Parameter.CommaDelimited
+import com.timeout.cf.CfExp._
+import com.timeout.cf.Parameter.CommaDelimited
 import io.circe.syntax._
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.{Encoder, Json}
@@ -45,8 +45,17 @@ object Encoding {
       Json.obj("Fn::Not" -> List(cond).asJson) // weird but correct according to the doc
     case FnJoin(delimiter, chunks) =>
       Json.obj("Fn::Join" -> Json.arr(delimiter.asJson, chunks.asJson))
-    case FnOr(conds@_*) =>
+    case FnOr(conds) =>
       Json.obj("Fn::Or" -> conds.asJson)
+    case FnGetAZs(region) =>
+      Json.obj("Fn::GetAZs" ->
+        Json.fromString(region.getOrElse(""))
+      )
+    case FnSplit(separator, string) =>
+      Json.obj("Fn::Split" -> Json.arr(
+        Json.fromString(separator),
+        string.asJson
+    ))
     case FnFindInMap(m, key1, key2) =>
       Json.obj("Fn::FindInMap" -> Json.arr(
         m.logicalId.asJson,
@@ -183,7 +192,10 @@ object Encoding {
   }
 
   private def fold[A: Encoder](objects: List[A]): Json =
-    objects.foldLeft(Json.obj()) { case (o, item) =>
+    if (objects.isEmpty)
+      Json.Null
+    else
+      objects.foldLeft(Json.obj()) { case (o, item) =>
       o.deepMerge(item.asJson)
     }
 

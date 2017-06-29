@@ -1,4 +1,4 @@
-package com.timeout.scalacloudformation
+package com.timeout.cf
 
 import io.circe.Json
 

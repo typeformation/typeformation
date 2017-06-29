@@ -1,4 +1,4 @@
-package com.timeout.scalacloudformation
+package com.timeout.cf
 
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._

@@ -5,7 +5,7 @@ import java.time.Duration
 import io.circe.Json
 import enum.Enum
 
-package object scalacloudformation {
+package object cf {
   trait ResourceProperty
 
   trait HasLogicalId {
@@ -54,9 +54,10 @@ package object scalacloudformation {
     def UpdatePolicy: Option[ResourceAttributes.UpdatePolicy]
     def DeletionPolicy: Option[ResourceAttributes.DeletionPolicy]
     def CreationPolicy: Option[ResourceAttributes.CreationPolicy]
+    def Metadata: Option[Json]
     def jsonEncode: Json
 
-    override def ref = CfExp.ResourceRef(this)
+    override def ref: CfExp[String] = CfExp.ResourceRef(this)
   }
 
   case class Tag(key: String, value: String)
