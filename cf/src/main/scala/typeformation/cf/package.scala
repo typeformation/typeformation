@@ -1,4 +1,4 @@
-package com.timeout
+package typeformation
 
 import java.time.Duration
 

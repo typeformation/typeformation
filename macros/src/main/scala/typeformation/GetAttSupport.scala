@@ -1,4 +1,4 @@
-package com.timeout
+package typeformation
 
 import kantan.csv._
 import kantan.csv.ops._
@@ -8,7 +8,8 @@ object GetAttSupport {
   case class Attribute(resourceTypeFqn: String, attributes: List[String])
 
   lazy val attributesByResourceType: Map[String, Attribute] = {
-    val res = getClass.getResource("/com/timeout/getatt-properties.csv")
+    val pkg = getClass.getPackage.getName.replace(".","/")
+    val res = getClass.getResource(s"/$pkg/getatt-properties.csv")
     val csvS = Source.fromURL(res).mkString
 
     csvS

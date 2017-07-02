@@ -1,4 +1,5 @@
-package com.timeout.cf
+package typeformation.cf
+
 import shapeless.Witness
 
 import scala.annotation.implicitNotFound

@@ -1,4 +1,4 @@
-package com.timeout
+package typeformation
 
 import scala.meta._
 
@@ -55,7 +55,7 @@ class CodeGen(conf: CodeGen.Config) {
     resourceTypesByFqn.values.toList.map { rt =>
       val normalized = normalize(rt.fqn)
       val typeName = Type.Name(normalized)
-      val namespace = normalize(rt.fqn.takeWhile(_ != "."))
+      val namespace = normalize(rt.fqn.takeWhile(_ != '.'))
 
       val logicalIdProp: Term.Param = param"logicalId: String"
       val dependsOn: Term.Param = param"DependsOn: Option[Resource] = None"
@@ -71,7 +71,7 @@ class CodeGen(conf: CodeGen.Config) {
       val fqn = Term.Name("\"" + rt.fqn + "\"")
 
       val jsonFields = rt.properties.map { prop =>
-        q"${Lit(prop.name)} -> ${Term.Name(prop.name)}.asJson"
+        q"${Lit.String(prop.name)} -> ${Term.Name(prop.name)}.asJson"
       }
 
       val declaration = q"""
@@ -99,7 +99,7 @@ class CodeGen(conf: CodeGen.Config) {
     attr.attributes.map { name =>
       val normalisedName = name.replace(".", "Dot")
       val valName = Pat.Var.Term(Term.Name(s"attr$normalisedName"))
-      val attrName = Lit(normalisedName)
+      val attrName = Lit.String(normalisedName)
       val typeName = Type.Name(normalize(attr.resourceTypeFqn))
       q"""implicit val $valName = HasGetAtt.mk[$typeName]($attrName)"""
     }

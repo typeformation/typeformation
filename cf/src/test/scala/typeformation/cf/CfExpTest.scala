@@ -1,6 +1,6 @@
-package com.timeout.cf
+package typeformation.cf
 
-import com.timeout.cf.CfExp._
+import CfExp._
 import io.circe.parser._
 import io.circe.syntax._
 import org.scalatest.{FreeSpec, Matchers}
@@ -28,7 +28,7 @@ object CfExpTest {
   implicit val enc = Encoder.instance[TestResource](_.jsonEncode)
 }
 
-import com.timeout.cf.CfExpTest._
+import CfExpTest._
 
 class CfExpTest extends FreeSpec with Matchers {
   "Literals are handled" in {

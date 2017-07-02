@@ -1,11 +1,10 @@
-package com
-
-package object timeout {
+package object typeformation {
   type Namespace = String
   case class PropertyType(namespace: Namespace, name: String, properties: List[Property])
 
   sealed trait AwsType
   sealed trait PrimitiveType extends AwsType
+
   case object TagType extends AwsType
   case class PropertyTypeRef(namespace: String, name: String) extends AwsType
   case class ListType(awsType: AwsType) extends AwsType

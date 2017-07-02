@@ -1,7 +1,6 @@
-package com.timeout
+package typeformation
 
-import com.timeout.CodeGen.Config
-
+import typeformation.CodeGen.Config
 import scala.meta._
 
 class CloudformationGen extends scala.annotation.StaticAnnotation {

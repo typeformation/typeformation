@@ -1,18 +1,21 @@
-package com.timeout.cf
+package typeformation.cf
 
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-import com.timeout.cf.CfExp._
-import com.timeout.cf.Parameter.CommaDelimited
+import typeformation.cf.CfExp._
+import typeformation.cf.Parameter.{AwsParamType, CommaDelimited}
+import AwsParamType._
 import io.circe.syntax._
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.{Encoder, Json}
-import enum.Enum
 import java.time.Duration
+import enum.Enum
+
 import ResourceAttributes._
 
 object Encoding {
+
   implicit final val encodeDuration: Encoder[Duration] =
     Encoder.instance(duration => Json.fromString(duration.toString))
 
@@ -95,9 +98,10 @@ object Encoding {
     Json.fromString(implicitly[Enum[T]].encode(t))
   }
 
+
   implicit val encodeParamDataType: Encoder[Parameter.DataType] = {
     import Parameter.DataType._
-    val awsEnum = implicitly[Enum[Parameter.AwsType]]
+    val awsEnum = implicitly[Enum[Parameter.AwsParamType]]
 
     Encoder.instance[Parameter.DataType] { dt =>
       val s = dt match {

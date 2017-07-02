@@ -1,8 +1,8 @@
-package com.timeout.cf
+package typeformation.cf
 
 import java.time.{Duration, ZonedDateTime}
 
-import com.timeout.cf.Template.Mapping
+import Template.Mapping
 import io.circe.{Encoder, Json}
 import io.circe.syntax._
 import shapeless.Witness
@@ -71,8 +71,7 @@ object CfExp {
     * or one of the supplied mappings
     */
   private [cf] case class FnSub(string: String,
-                                mappings: Option[Map[String,
-                                                 CfExp[String]]]) extends E[String]
+                                mappings: Option[Map[String, CfExp[String]]]) extends E[String]
   def fnSub(s: String, mappings: Option[Map[String, CfExp[String]]] = None): E[String] = FnSub(s, mappings)
 
   private [cf] case class FnGetAtt(logicalId: String, attributeName: String) extends E[String]
@@ -112,4 +111,8 @@ object CfExp {
     : CfExp[String] =
       FnJoin(separator, gen.to(tuple).map(encodeExp).toList)
   }
+
+  private case class FnImportValue(sharedValueToImport: E[String]) extends E[String]
+  def fnImportValue(sharedValue: E[String]): E[String] = FnImportValue(sharedValue)
+  def fnImportValue(output: Output): Option[E[String]] = output.Export.map(FnImportValue)
 }

@@ -1,5 +1,6 @@
-package com.timeout.cf
-import com.timeout.cf.CfExp.ParameterRef
+package typeformation.cf
+
+import CfExp.ParameterRef
 import enum.Enum
 
 sealed trait Parameter extends HasLogicalId with HasRef {
@@ -12,21 +13,21 @@ sealed trait Parameter extends HasLogicalId with HasRef {
 }
 
 object Parameter {
-  sealed trait AwsType
+  sealed trait AwsParamType
 
-  object AwsType {
-    case object `AWS::EC2::AvailabilityZone::Name` extends AwsType
-    case object `AWS::EC2::Instance::Id` extends AwsType
-    case object `AWS::EC2::Image::Id` extends AwsType
-    case object `AWS::EC2::KeyPair::KeyName` extends AwsType
-    case object `AWS::EC2::SecurityGroup::GroupName` extends AwsType
-    case object `AWS::EC2::SecurityGroup::Id` extends AwsType
-    case object `AWS::EC2::Subnet::Id` extends AwsType
-    case object `AWS::EC2::Volume::Id` extends AwsType
-    case object `AWS::EC2::VPC::Id` extends AwsType
-    case object `AWS::Route53::HostedZone::Id` extends AwsType
+  object AwsParamType {
+    case object `AWS::EC2::AvailabilityZone::Name` extends AwsParamType
+    case object `AWS::EC2::Instance::Id` extends AwsParamType
+    case object `AWS::EC2::Image::Id` extends AwsParamType
+    case object `AWS::EC2::KeyPair::KeyName` extends AwsParamType
+    case object `AWS::EC2::SecurityGroup::GroupName` extends AwsParamType
+    case object `AWS::EC2::SecurityGroup::Id` extends AwsParamType
+    case object `AWS::EC2::Subnet::Id` extends AwsParamType
+    case object `AWS::EC2::Volume::Id` extends AwsParamType
+    case object `AWS::EC2::VPC::Id` extends AwsParamType
+    case object `AWS::Route53::HostedZone::Id` extends AwsParamType
 
-    implicit val enum: Enum[AwsType] = Enum.derived[AwsType]
+    implicit val awsParamEnum: Enum[AwsParamType] = Enum.derived[AwsParamType]
   }
 
   sealed trait DataType
@@ -35,8 +36,8 @@ object Parameter {
     case object Number extends DataType
     case object `List<Number>` extends DataType
     case object CommaDelimitedList extends DataType
-    case class AwsType(tpe: Parameter.AwsType) extends DataType
-    case class AwsTypeList(tpe: Parameter.AwsType) extends DataType
+    case class AwsType(tpe: Parameter.AwsParamType) extends DataType
+    case class AwsTypeList(tpe: Parameter.AwsParamType) extends DataType
   }
 
   case class Str(logicalId: String,
@@ -80,7 +81,7 @@ object Parameter {
   }
 
   case class Aws(logicalId: String,
-                 awsType: Parameter.AwsType,
+                 awsType: Parameter.AwsParamType,
                  Description: Option[String] = None,
                  NoEcho: Option[Boolean] = None,
                  Default: Option[String] = None,
@@ -89,7 +90,7 @@ object Parameter {
   }
 
   case class AwsList(logicalId: String,
-                     awsType: Parameter.AwsType,
+                     awsType: Parameter.AwsParamType,
                      Description: Option[String] = None,
                      NoEcho: Option[Boolean] = None,
                      Default: Option[String] = None,

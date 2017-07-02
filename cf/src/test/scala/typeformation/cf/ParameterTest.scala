@@ -1,4 +1,4 @@
-package com.timeout.cf
+package typeformation.cf
 
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -87,7 +87,7 @@ class ParameterTest extends FreeSpec {
      val param: Parameter = Parameter.AwsList(
       logicalId = "SubnetIds",
       Description = Some("Subnet ids"),
-      awsType = Parameter.AwsType.`AWS::EC2::Subnet::Id`
+      awsType = Parameter.AwsParamType.`AWS::EC2::Subnet::Id`
     )
 
     dropNullKeys(param.asJson) should ===(
@@ -105,7 +105,7 @@ class ParameterTest extends FreeSpec {
     val param: Parameter = Parameter.Aws(
       logicalId = "userKeys",
       Description = Some("Amazon EC2 Key Pair"),
-      awsType = Parameter.AwsType.`AWS::EC2::KeyPair::KeyName`
+      awsType = Parameter.AwsParamType.`AWS::EC2::KeyPair::KeyName`
     )
 
     dropNullKeys(param.asJson) should ===(

@@ -1,4 +1,4 @@
-package com.timeout.cf
+package typeformation.cf
 
 import io.circe.Json
 

@@ -1,4 +1,4 @@
-package com.timeout.cf
+package typeformation.cf
 
 case class Output(logicalId: String,
                   Value: CfExp[String],

@@ -1,6 +1,6 @@
-package com.timeout.cf
+package typeformation.cf
 
-import com.timeout.cf.CfExp.PseudoParameterRef
+import CfExp.PseudoParameterRef
 
 trait PseudoParameter extends HasRef {
   def toString: String

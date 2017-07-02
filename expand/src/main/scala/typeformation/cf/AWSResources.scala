@@ -1,6 +1,6 @@
-package com.timeout.cf
+package typeformation.cf
 
-import com.timeout.CloudformationGen
+import typeformation.CloudformationGen
 import io.circe.Encoder
 import io.circe.generic.semiauto._
 import io.circe.Json

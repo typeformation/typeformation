@@ -1,4 +1,4 @@
-package com.timeout
+package typeformation
 
 import io.circe.Decoder.Result
 import io.circe._
