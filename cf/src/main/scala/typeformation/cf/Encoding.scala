@@ -116,25 +116,25 @@ object Encoding {
     }
   }
 
-  implicit val autoscalingPolicy: Encoder[AutoscalingCreationPolicy] =
+  implicit val encodeAutoscalingPolicy: Encoder[AutoscalingCreationPolicy] =
     deriveEncoder[AutoscalingCreationPolicy]
 
-  implicit val resourceSignal: Encoder[ResourceSignal] =
+  implicit val encodeResourceSignal: Encoder[ResourceSignal] =
     deriveEncoder[ResourceSignal]
 
-  implicit val creationPolicy: Encoder[CreationPolicy] =
+  implicit val encodeCreationPolicy: Encoder[CreationPolicy] =
     deriveEncoder[CreationPolicy]
 
-  implicit val autoScalingReplacingUpdate: Encoder[AutoScalingReplacingUpdate] =
+  implicit val encodeAutoScalingReplacingUpdate: Encoder[AutoScalingReplacingUpdate] =
     deriveEncoder[AutoScalingReplacingUpdate]
 
-  implicit val autoScalingRollingUpdate: Encoder[AutoScalingRollingUpdate] =
+  implicit val encodeAutoScalingRollingUpdate: Encoder[AutoScalingRollingUpdate] =
     deriveEncoder[AutoScalingRollingUpdate]
 
-  implicit val autoScalingScheduledAction: Encoder[AutoScalingScheduledAction] =
+  implicit val encodeAutoScalingScheduledAction: Encoder[AutoScalingScheduledAction] =
     deriveEncoder[AutoScalingScheduledAction]
 
-  implicit val updatePolicy: Encoder[UpdatePolicy] =
+  implicit val encodeUpdatePolicy: Encoder[UpdatePolicy] =
     deriveEncoder[UpdatePolicy]
 
   implicit val encodeParam: Encoder[Parameter] =
@@ -178,20 +178,19 @@ object Encoding {
       Json.obj(p.logicalId -> common.deepMerge(specific))
     }
 
-  implicit val condition: Encoder[Condition] = deriveEncoder[Condition]
+  implicit val encodeCondition: Encoder[Condition] = deriveEncoder[Condition]
 
-  implicit val output: Encoder[Output] = Encoder.instance { o =>
+  implicit val encodeOutput: Encoder[Output] = Encoder.instance { o =>
     Json.obj(o.logicalId -> Json.obj(
       "Description" -> o.Description.asJson,
       "Value" -> o.Value.asJson,
-      "Condition" -> o.Condition.map(_.logicalId).asJson,
-      "Export" -> Json.obj(
-        "Name" -> o.Export.asJson
-      )
-    ))
+      "Condition" -> o.Condition.map(_.logicalId).asJson
+    ).deepMerge(o.Export.fold(Json.obj()){ e =>
+      Json.obj("Export" -> Json.obj("Name" -> e.asJson))
+    }))
   }
 
-  implicit val mapping: Encoder[Template.Mapping] = Encoder.instance { o =>
+  implicit val encodeMapping: Encoder[Template.Mapping] = Encoder.instance { o =>
     Json.obj(o.logicalId -> o.value.asJson)
   }
 
@@ -203,7 +202,7 @@ object Encoding {
       o.deepMerge(item.asJson)
     }
 
-  implicit val template: Encoder[Template] = Encoder.instance { t =>
+  implicit val encodeTemplate: Encoder[Template] = Encoder.instance { t =>
     Json.obj(
       "AWSTemplateFormatVersion" -> Json.fromString("2010-09-09"),
       "Description" -> t.Description.asJson,

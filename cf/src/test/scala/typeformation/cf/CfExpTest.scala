@@ -1,11 +1,12 @@
 package typeformation.cf
 
-import CfExp._
 import io.circe.parser._
 import io.circe.syntax._
+import io.circe.{Encoder, Json}
 import org.scalatest.{FreeSpec, Matchers}
 import Encoding._
-import io.circe.{Encoder, Json}
+import typeformation.cf.CfExp.{PseudoParameterRef, ResourceRef}
+import typeformation.cf.syntax._
 
 object CfExpTest {
   case class TestResource(logicalId: String, foo: CfExp[String]) extends Resource {
@@ -46,7 +47,7 @@ class CfExpTest extends FreeSpec with Matchers {
     val expJson = parse(exp)
 
     val actual = TestResource(
-      logicalId = "Logical ID", foo = Lit("bar")
+      logicalId = "Logical ID", foo = "bar"
     ).asJson
 
     Right(actual) should ===(expJson)
@@ -67,7 +68,7 @@ class CfExpTest extends FreeSpec with Matchers {
     val expJson = parse(exp)
 
     val actual = TestResource(
-      logicalId = "Logical ID", foo = FnBase64(Lit("bar"))
+      logicalId = "Logical ID", foo = fnBase64("bar")
     ).asJson
 
     Right(actual) should ===(expJson)
@@ -116,15 +117,15 @@ class CfExpTest extends FreeSpec with Matchers {
       logicalId = "Logical ID", foo = fnIf(
         fnEquals(
           fnAnd(
-            lit(true),
+            true,
             fnNot(
-              lit(true)
+              true
             )
           ),
-          fnOr(lit(true), lit(false))
+          fnOr(true, false)
         ),
-        lit("a"),
-        lit("b")
+        "a",
+        "b"
       )
     ).asJson
 
@@ -137,7 +138,7 @@ class CfExpTest extends FreeSpec with Matchers {
     )
 
     val actual = TestResource(
-      logicalId = "ID", foo = fnFindInMap(m, PseudoParameter.Region.ref, lit("X"))
+      logicalId = "ID", foo = fnFindInMap(m, PseudoParameter.Region.ref, "X")
     ).asJson
 
     val expJson = parse(
@@ -167,7 +168,7 @@ class CfExpTest extends FreeSpec with Matchers {
     )
 
     val actual = TestResource(
-      logicalId = "ID", foo = FnJoin("/", tuple)
+      logicalId = "ID", foo = fnJoin("/", tuple)
     ).asJson
 
     val expJson = parse(
@@ -192,7 +193,7 @@ class CfExpTest extends FreeSpec with Matchers {
   }
 
   "FnSelect is handled" in {
-    val exp = fnSelect(2, lit(List("foo", "bar")))
+    val exp = fnSelect(2, List("foo", "bar"))
     val expJson = parse(
       """
         |{
@@ -225,7 +226,7 @@ class CfExpTest extends FreeSpec with Matchers {
   }
 
   "FnSplit is handled" in {
-    val exp = fnSelect(2, fnSplit("/", lit("foo/bar/baz")))
+    val exp = fnSelect(2, fnSplit("/", "foo/bar/baz"))
 
     val expJson = parse(
       """
@@ -256,7 +257,7 @@ class CfExpTest extends FreeSpec with Matchers {
   }
 
   "Resource Ref is handled" in {
-    val resource = TestResource("referenced", Lit("foo"))
+    val resource = TestResource("referenced", "foo")
 
     val actual = TestResource("ID", ResourceRef(resource)).asJson
 
@@ -305,13 +306,13 @@ class CfExpTest extends FreeSpec with Matchers {
     implicit val testResourceAttr2 = HasGetAtt.mk[TestResource]("attr2")
 
     "statically checks attribute names" in {
-      assertCompiles("""FnGetAtt(res, "attr1")""")
-      assertCompiles("""FnGetAtt(res, "attr2")""")
-      assertDoesNotCompile("""FnGetAtt(res, "attr3")""")
+      assertCompiles("""fnGetAtt(res, "attr1")""")
+      assertCompiles("""fnGetAtt(res, "attr2")""")
+      assertDoesNotCompile("""fnGetAtt(res, "attr3")""")
     }
     "is handled" in {
       val expJson = parse("""{ "Fn::GetAtt": ["ID", "attr1"] } """)
-      val exp: CfExp[String] = FnGetAtt(res, "attr1")
+      val exp: CfExp[String] = fnGetAtt(res, "attr1")
       Right(exp.asJson) should ===(expJson)
     }
   }

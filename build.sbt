@@ -1,7 +1,6 @@
-
 crossScalaVersions := Seq("2.11.11", "2.12.2")
 
-scalaVersion in ThisBuild := "2.11.11"
+scalaVersion in ThisBuild := "2.12.2"
 
 organization in ThisBuild := "typeformation"
 
@@ -10,7 +9,14 @@ val circeVersion = "0.8.0"
 lazy val commonSettings = Seq(
   resolvers += Resolver.bintrayRepo("scalameta", "maven"),
   scalacOptions ++= Seq(
-    "-deprecation"
+    "-encoding", "UTF-8", // 2 args
+    "-feature",
+    "-deprecation",
+    "-language:implicitConversions",
+    "-unchecked",
+    "-Yno-adapted-args",
+    "-Ywarn-dead-code",
+    "-Ywarn-value-discard"
   ),
   organization := "typeformation",
   libraryDependencies ++= Seq(
@@ -65,11 +71,15 @@ lazy val macros = (project in file("macros")).
   ).
   dependsOn(cf)
 
-lazy val expand = (project in file("expand")).
+lazy val resources = (project in file("resources")).
   settings(commonSettings: _*).
   settings(macroSettings: _*).
   dependsOn(macros)
 
+lazy val examples = (project in file("examples")).
+  settings(commonSettings: _*).
+  dependsOn(resources)
+
 lazy val root =
   (project in file(".")).
-    aggregate(macros, expand, cf)
+    aggregate(macros, resources, cf, examples)
