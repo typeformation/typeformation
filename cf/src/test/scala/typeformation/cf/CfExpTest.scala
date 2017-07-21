@@ -303,8 +303,8 @@ class CfExpTest extends FreeSpec with Matchers {
     val res = TestResource(logicalId = "ID", foo = lit("bar"))
 
     //Note: These implicit values are created at macro expansion time
-    implicit val testResourceAttr1 = HasGetAtt.mk[TestResource]("attr1")
-    implicit val testResourceAttr2 = HasGetAtt.mk[TestResource]("attr2")
+    implicit val testResourceAttr1 = ResourceAtt.mk[TestResource]("attr1")
+    implicit val testResourceAttr2 = ResourceAtt.mk[TestResource]("attr2")
 
     "statically checks attribute names" in {
       assertCompiles("""fnGetAtt(res, "attr1")""")

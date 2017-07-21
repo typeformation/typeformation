@@ -14,7 +14,7 @@ trait Conversions {
     FnSubToken.LogicalId(t)
 
   implicit class FnSubResourceSyntax[R <: Resource](resource: R) {
-    def attr(w: Witness.Lt[String])(implicit ev: HasGetAtt[R, w.T]): FnSubToken.ResourceAttribute[R] =
+    def attr(w: Witness.Lt[String])(implicit ev: ResourceAtt[R, w.T]): FnSubToken.ResourceAttribute[R] =
       FnSubToken.ResourceAttribute(resource, w.value)
   }
 }

@@ -43,7 +43,7 @@ trait Functions {
     FnGetAtt(v.logicalId, attributeName)
 
   def fnGetAtt[R <: Resource](resource: R, w: Witness)
-                             (implicit hasGetAtt: HasGetAtt[R, w.T]): E[String] =
+                             (implicit hasGetAtt: ResourceAtt[R, w.T]): E[String] =
       FnGetAtt(resource.logicalId, hasGetAtt.attributeName)
 
   private object encodeExp extends Poly1 {

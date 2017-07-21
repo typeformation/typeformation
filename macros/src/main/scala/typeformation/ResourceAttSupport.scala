@@ -4,7 +4,7 @@ import kantan.csv._
 import kantan.csv.ops._
 import scala.io.Source
 
-object GetAttSupport {
+object ResourceAttSupport {
   case class Attribute(resourceTypeFqn: String, attributes: List[String])
 
   lazy val attributesByResourceType: Map[String, Attribute] = {

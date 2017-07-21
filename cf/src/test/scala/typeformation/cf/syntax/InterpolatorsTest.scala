@@ -23,7 +23,7 @@ class InterpolatorsTest extends FreeSpec with Matchers {
 
     val resource = new TestResource {}
 
-    implicit val resAttr = HasGetAtt.mk[TestResource]("testAttr")
+    implicit val resAttr = ResourceAtt.mk[TestResource]("testAttr")
 
     "rejects non-token arguments" in {
       illTyped { """fnSub"$param and $resource and ${'notAToken}"""" }

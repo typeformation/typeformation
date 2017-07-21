@@ -13,7 +13,6 @@ class CodeGen(conf: CodeGen.Config) {
   private val propertyTypesByFqn =
     SpecsParser.propertyTypes(conf.excludePrefixes)
 
-  // Contains custom properties and generic derivations
   val objectStats: List[Defn.Object] = propertyTypesByFqn.toList.map { case (namespace, props) =>
       val objectName = Term.Name(normalize(namespace))
       val typeName = Type.Name(normalize(namespace))
@@ -34,7 +33,7 @@ class CodeGen(conf: CodeGen.Config) {
         """
       }
       val getAttInstances =
-        GetAttSupport.attributesByResourceType
+        ResourceAttSupport.attributesByResourceType
           .get(namespace).map(mkGetAttInstance)
           .getOrElse(Nil)
 
@@ -95,13 +94,13 @@ class CodeGen(conf: CodeGen.Config) {
       declaration
     }
 
-  private def mkGetAttInstance(attr: GetAttSupport.Attribute): List[Stat] =
+  private def mkGetAttInstance(attr: ResourceAttSupport.Attribute): List[Stat] =
     attr.attributes.map { name =>
       val normalisedName = name.replace(".", "Dot")
       val valName = Pat.Var.Term(Term.Name(s"attr$normalisedName"))
       val attrName = Lit.String(normalisedName)
       val typeName = Type.Name(normalize(attr.resourceTypeFqn))
-      q"""implicit val $valName = HasGetAtt.mk[$typeName]($attrName)"""
+      q"""implicit val $valName = ResourceAtt.mk[$typeName]($attrName)"""
     }
 
   private def mkField(property: Property, namespace: Option[Namespace]): Term.Param = {
