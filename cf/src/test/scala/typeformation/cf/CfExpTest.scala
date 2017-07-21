@@ -5,6 +5,7 @@ import io.circe.syntax._
 import io.circe.{Encoder, Json}
 import org.scalatest.{FreeSpec, Matchers}
 import Encoding._
+import shapeless.test.illTyped
 import typeformation.cf.CfExp.{PseudoParameterRef, ResourceRef}
 import typeformation.cf.syntax._
 
@@ -308,7 +309,7 @@ class CfExpTest extends FreeSpec with Matchers {
     "statically checks attribute names" in {
       assertCompiles("""fnGetAtt(res, "attr1")""")
       assertCompiles("""fnGetAtt(res, "attr2")""")
-      assertDoesNotCompile("""fnGetAtt(res, "attr3")""")
+      illTyped { """fnGetAtt(res, "attr3")""" }
     }
     "is handled" in {
       val expJson = parse("""{ "Fn::GetAtt": ["ID", "attr1"] } """)
