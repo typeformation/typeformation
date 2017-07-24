@@ -1,4 +1,4 @@
-package typeformation.cf.cloudinit
+package typeformation.cf.init
 import typeformation.cf.{CfExp, HasLogicalId}
 
 case class Command(logicalId: String,

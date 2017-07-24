@@ -1,4 +1,4 @@
-package typeformation.cf.cloudinit
+package typeformation.cf.init
 
 import typeformation.cf.CfExp
 
@@ -20,7 +20,7 @@ object File {
                         authentication: Option[String] = None) extends File
 
   case class FromUrl(path: String,
-                     source: String,
+                     source: CfExp[String],
                      encoding: Option[FileEncoding] = None,
                      mode: Option[String] = None,
                      group: Option[String] = None,

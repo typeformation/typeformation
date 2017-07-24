@@ -1,4 +1,4 @@
-package typeformation.cf.cloudinit
+package typeformation.cf.init
 
 case class User(username: String,
                 uid: Option[Int] = None,

@@ -1,4 +1,4 @@
-package typeformation.cf.cloudinit
+package typeformation.cf.init
 
 import typeformation.cf.syntax.lit
 import typeformation.cf.{CfExp, HasLogicalId}
@@ -13,6 +13,9 @@ object Init {
                     services: Service.Services = Service.Sysvinit(Nil),
                     sources: List[Source] = Nil,
                     users: List[User] = Nil) extends HasLogicalId
+
+  def apply(config: Config): Init =
+    Init(List(ConfigSet(config.logicalId, List(config))))
 
   def apply(sets: List[ConfigSet]): Init = {
     val configs = sets.flatMap(_.configs)

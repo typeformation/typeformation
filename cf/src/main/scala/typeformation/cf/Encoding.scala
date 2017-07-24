@@ -8,7 +8,7 @@ import typeformation.cf.CfExp._
 import typeformation.cf.Parameter.{AwsParamType, CommaDelimited}
 import AwsParamType._
 import io.circe.syntax._
-import typeformation.cf.cloudinit._
+import typeformation.cf.init._
 import io.circe.{Encoder, Json, JsonObject}
 import java.time.Duration
 

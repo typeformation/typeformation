@@ -1,4 +1,4 @@
-package typeformation.cf.cloudinit
+package typeformation.cf.init
 
 import enum.Enum
 

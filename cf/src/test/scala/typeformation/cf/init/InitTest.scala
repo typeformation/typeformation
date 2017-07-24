@@ -1,4 +1,4 @@
-package typeformation.cf.cloudinit
+package typeformation.cf.init
 
 import io.circe.Json
 import org.scalatest.{FreeSpec, Matchers}
@@ -7,7 +7,7 @@ import typeformation.cf.syntax._
 import io.circe.parser.parse
 import typeformation.cf.{JsonTest, Parameter}
 import typeformation.cf.Encoding._
-import typeformation.cf.cloudinit.Init.{Config, ConfigSet}
+import typeformation.cf.init.Init.{Config, ConfigSet}
 
 class InitTest extends FreeSpec with JsonTest with Matchers {
   "Command is supported" in {

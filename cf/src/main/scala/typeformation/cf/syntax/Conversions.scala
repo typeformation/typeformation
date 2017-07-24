@@ -10,8 +10,11 @@ trait Conversions {
 
   implicit def lit2Exp[T: IsLit](value: T): CfExp[T] = lit(value)
 
-  implicit def logicalId2Token[T <: HasLogicalId](t: T): FnSubToken.LogicalId[T] =
-    FnSubToken.LogicalId(t)
+  implicit def lit2Token[T: IsLit](value: T): FnSubToken.Literal[T] =
+    FnSubToken.Literal(value)
+
+  implicit def logicalId2Token[T <: HasLogicalId](value: T): FnSubToken.LogicalId[T] =
+    FnSubToken.LogicalId(value)
 
   implicit class FnSubResourceSyntax[R <: Resource](resource: R) {
     def attr(w: Witness.Lt[String])(implicit ev: ResourceAtt[R, w.T]): FnSubToken.ResourceAttribute[R] =
