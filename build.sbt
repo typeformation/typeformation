@@ -76,10 +76,6 @@ lazy val resources = (project in file("resources")).
   settings(macroSettings: _*).
   dependsOn(macros)
 
-lazy val examples = (project in file("examples")).
-  settings(commonSettings: _*).
-  dependsOn(resources)
-
 lazy val root =
   (project in file(".")).
-    aggregate(macros, resources, cf, examples)
+    aggregate(macros, resources, cf)
