@@ -7,9 +7,10 @@ import typeformation.cf.{Arn, JsonTest}
 import io.circe.parser.parse
 import typeformation.cf.Encoding._
 import io.circe.syntax._
-import typeformation.cf.iam._
 import typeformation.cf.syntax._
 import Condition._
+import typeformation.cf.iam.Invertible._
+import typeformation.cf.iam.syntax._
 
 class IamEncodingTest extends JsonTest {
   "IAM entities encoding" - {
@@ -56,14 +57,14 @@ class IamEncodingTest extends JsonTest {
     }
     "Conditions are supported" - {
       "supports positive conditions" in {
-        val condition1: Condition =
-          StringEquals(Key("aws:UserAgent"), List("Example Corp Java Client"))
+        val condition1 =
+          stringEquals(Key("aws:UserAgent"), List("Example Corp Java Client"))
 
         Right(condition1.asJson) should ===(parse(
           """{"StringEquals": {"aws:UserAgent": "Example Corp Java Client"}}"""))
 
         val condition2: Condition =
-          IpAddress(Key("aws:SourceIp"), List("192.0.2.0/24", "203.0.113.0/24"))
+          ipAddress(Key("aws:SourceIp"), List("192.0.2.0/24", "203.0.113.0/24"))
 
         Right(condition2.asJson) should ===(
           parse("""{
@@ -73,11 +74,10 @@ class IamEncodingTest extends JsonTest {
           |}
           """.stripMargin))
 
-        val condition3: Condition =
-          DateLessThan(Key("aws:CurrentTime"),
-                       expected =
-                         ZonedDateTime.of(LocalDateTime.of(2013, 6, 30, 0, 0),
-                                          ZoneOffset.UTC))
+        val condition3 =
+          dateLessThan(Key("aws:CurrentTime"),
+                       ZonedDateTime.of(LocalDateTime.of(2013, 6, 30, 0, 0),
+                                        ZoneOffset.UTC))
 
         Right(condition3.asJson) should ===(
           parse("""
@@ -85,49 +85,43 @@ class IamEncodingTest extends JsonTest {
           """.stripMargin))
       }
       "Support qualifiers" in {
-        Seq[Qualifier](ForAnyValue, ForAllValues)
-          .foreach { qualifier =>
-            val condition: Condition =
-              StringEquals(Key("aws:UserAgent"),
-                           List("IE6", "IE7"),
-                           Some(qualifier))
+        val condition =
+          stringEquals(Key("aws:UserAgent"), List("IE6", "IE7")).forAllValues
 
-            Right(condition.asJson) should ===(parse(
-              s"""{"${qualifier.id}:StringEquals": {"aws:UserAgent": ["IE6", "IE7"]}}"""))
-          }
-
+        Right(condition.asJson) should ===(parse(
+          s"""{"ForAllValues:StringEquals": {"aws:UserAgent": ["IE6", "IE7"]}}"""))
       }
-      "Support ifExist" in {
-        val condition: Condition =
-          StringEquals(key = Key("ec2:InstanceType"),
-                       expected = List("t1.*"),
-                       ifExists = true)
 
-        Right(condition.asJson) should ===(
-          parse(s"""{"StringEqualsIfExists": {"ec2:InstanceType": "t1.*"}}"""))
-      }
     }
-    "Policies are supported" in {
-      val policy =
-        Policy(
-          Id = Some(UUID.fromString("cd3ad3d9-2776-4ef1-a904-4c229d1642ee")),
-          Statement = List(
-            Statement(
-              Sid = Some("bucket-get-put"),
-              Effect = Effect.Allow,
-              Principal = Some(Principal.CanonicalUser("user-id")),
-              Resource = List(Arn("arn:aws:s3:::mybucket")),
-              Condition = List(
-                StringLike(Key("s3:prefix"), List("${aws:username}/*")),
-                StringNotLike(Key("s3:prefix"), List("secrets/*")),
-              ),
-              Action =
-                Invertible.Pos(Action(Set("s3:GetObject", "s3:PutObject")))
-            ))
-        )
+    "Support ifExist" in {
+      val condition =
+        stringEquals(Key("ec2:InstanceType"), List("t1.*")).ifExists
 
-      Right(policy.asJson) should ===(
-        parse("""
+      Right(condition.asJson) should ===(
+        parse(s"""{"StringEqualsIfExists": {"ec2:InstanceType": "t1.*"}}"""))
+    }
+  }
+  "Policies are supported" in {
+    val policy =
+      Policy(
+        Id = Some(UUID.fromString("cd3ad3d9-2776-4ef1-a904-4c229d1642ee")),
+        Statement = List(
+          Statement(
+            Sid = Some("bucket-get-put"),
+            Effect = Effect.Allow,
+            Principal = Some(Principal.CanonicalUser("user-id")),
+            Resource = List(Arn("arn:aws:s3:::mybucket")),
+            Condition = List(
+              stringNotLike(Key("s3:prefix"), List("secrets/*")),
+              stringLike(Key("s3:prefix"), List("${aws:username}/*")),
+              numericLessThan(Key("aws:MultiFactorAuthAge"), 3600)
+            ),
+            Action = Action(Set("s3:GetObject", "s3:PutObject"))
+          ))
+      )
+
+    Right(policy.asJson) should ===(
+      parse("""
         | {
         |   "Id": "cd3ad3d9-2776-4ef1-a904-4c229d1642ee",
         |   "Version": "2012-10-17",
@@ -142,7 +136,8 @@ class IamEncodingTest extends JsonTest {
         |          ],
         |          "Condition": {
         |            "StringNotLike": { "s3:prefix": "secrets/*" },
-        |            "StringLike": { "s3:prefix" : "${aws:username}/*" }
+        |            "StringLike": { "s3:prefix" : "${aws:username}/*" },
+        |            "NumericLessThan": {"aws:MultiFactorAuthAge": 3600}
         |          },
         |          "Principal": {
         |            "CanonicalUser": "user-id"
@@ -150,6 +145,5 @@ class IamEncodingTest extends JsonTest {
         |      }
         |   ]
         | }""".stripMargin))
-    }
   }
 }

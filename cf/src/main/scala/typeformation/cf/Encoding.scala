@@ -353,42 +353,16 @@ object Encoding {
     }
   }
 
-  private def encodeIamConditionJson(c: iam.Condition, expected: Json): Json = {
-    val suffix = if (c.ifExists) "IfExists" else ""
-
-    val labelWithModifiers =
-      c.qualifier.fold[String](c.label)(q => s"${q.id}:${c.label}") ++ suffix
-
-    Json.obj(
-      labelWithModifiers -> Json.obj(
-        c.key.value -> unwrapSingleton(expected)
-      )
-    )
-  }
-
   implicit val encodeIamCondition: Encoder[iam.Condition] = Encoder.instance {
     c =>
-      import typeformation.cf.iam.Condition._
-      implicit def intIamConditionEnc: Encoder[NumericCondition[Int]] =
-        Encoder.instance { c =>
-          encodeIamConditionJson(c, c.expected.asJson)
-        }
+      val suffix = if (c.hasIfExists) "IfExists" else ""
+      val labelWithModifiers =
+        c.quantifier.fold[String](c.label)(q => s"${q.id}:${c.label}") ++ suffix
 
-      implicit def floatIamConditionEnc: Encoder[NumericCondition[Float]] =
-        Encoder.instance { c =>
-          encodeIamConditionJson(c, c.expected.asJson)
-        }
-
-      val expected = c match {
-        case cnd: StrSeqCondition   => cnd.expected.asJson
-        case cnd: StrCondition      => cnd.expected.asJson
-        case cnd: ArnCondition      => cnd.expected.asJson
-        case cnd: BoolCondition     => cnd.expected.asJson
-        case cnd: DateTimeCondition => cnd.expected.asJson
-        case other =>
-          throw new NotImplementedError(s"Unsupported IAM Condition: $other")
-      }
-      encodeIamConditionJson(c, expected)
+      Json.obj(
+        labelWithModifiers -> Json.obj(
+          c.key.value -> unwrapSingleton(c.expressionEncoder(c.expected)))
+      )
   }
 
   implicit val encodeStatement: Encoder[iam.Statement] = Encoder.instance { s =>
@@ -463,8 +437,8 @@ object Encoding {
     if (objects.isEmpty)
       Json.Null
     else
-      objects.foldLeft(Json.obj()) {
-        case (o, item) =>
+      objects.foldRight(Json.obj()) {
+        case (item, o) =>
           o.deepMerge(item.asJson)
       }
 }
