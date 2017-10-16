@@ -9,17 +9,15 @@ import typeformation.cf.Encoding._
 import io.circe.syntax._
 import typeformation.cf.syntax._
 import Condition._
-import typeformation.cf.iam.Invertible._
 import typeformation.cf.iam.syntax._
 
 class IamEncodingTest extends JsonTest {
   "IAM entities encoding" - {
     "Principal is supported " in {
       val awsPrincipal: Principal = Principal.Aws(
-        List(
-          Arn("arn:aws:iam::111122223333:root"),
-          Arn("arn:aws:iam::444455556666:root")
-        ))
+        Arn("arn:aws:iam::111122223333:root"),
+        Arn("arn:aws:iam::444455556666:root")
+      )
 
       Right(awsPrincipal.asJson) should ===(
         parse("""
@@ -27,7 +25,7 @@ class IamEncodingTest extends JsonTest {
       """.stripMargin))
 
       val oneItemAwsPrincipal: Principal =
-        Principal.Aws(List(Arn("arn:aws:iam::111122223333:root")))
+        Principal.Aws(Arn("arn:aws:iam::111122223333:root"))
 
       Right(oneItemAwsPrincipal.asJson) should ===(
         parse("""
@@ -35,8 +33,7 @@ class IamEncodingTest extends JsonTest {
       """.stripMargin))
 
       val servicesPrincipal: Principal =
-        Principal.Service(
-          List("ec2.amazonaws.com", "datapipeline.amazonaws.com"))
+        Principal.Service("ec2.amazonaws.com", "datapipeline.amazonaws.com")
 
       Right(servicesPrincipal.asJson) should ===(
         parse("""{
@@ -116,7 +113,7 @@ class IamEncodingTest extends JsonTest {
               stringLike(Key("s3:prefix"), List("${aws:username}/*")),
               numericLessThan(Key("aws:MultiFactorAuthAge"), 3600)
             ),
-            Action = Action(Set("s3:GetObject", "s3:PutObject"))
+            Action = Action("s3:GetObject", "s3:PutObject")
           ))
       )
 

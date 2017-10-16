@@ -341,13 +341,13 @@ object Encoding {
   }
 
   implicit val iamActionEncoder: Encoder[iam.Action] =
-    implicitly[Encoder[Set[String]]].contramap(_.value)
+    implicitly[Encoder[Seq[String]]].contramap(_.value)
 
   implicit val encodeIamPrincipal: Encoder[iam.Principal] = {
     import iam.Principal._
     Encoder.instance {
-      case Aws(arns)            => Json.obj("AWS" -> unwrapSingleton(arns))
-      case Service(values)      => Json.obj("Service" -> values.asJson)
+      case Aws(arns @ _*)       => Json.obj("AWS" -> unwrapSingleton(arns))
+      case Service(values @ _*) => Json.obj("Service" -> values.asJson)
       case CanonicalUser(value) => Json.obj("CanonicalUser" -> value.asJson)
       case Federated(value)     => Json.obj("Federated" -> value.asJson)
     }

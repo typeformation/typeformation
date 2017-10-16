@@ -3,7 +3,8 @@ package typeformation.cf
 import enum.Enum
 
 package object iam {
-  case class Action(value: Set[String])
+  case class Action(value: String*)
+
   sealed trait Effect
   object Effect {
     object Allow extends Effect
