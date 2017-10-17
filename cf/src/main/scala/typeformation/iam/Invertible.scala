@@ -1,4 +1,4 @@
-package typeformation.cf.iam
+package typeformation.iam
 
 import typeformation.cf.Arn
 

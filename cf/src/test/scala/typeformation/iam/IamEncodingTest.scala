@@ -1,4 +1,4 @@
-package typeformation.cf.iam
+package typeformation.iam
 
 import java.time._
 import java.util.UUID
@@ -9,7 +9,7 @@ import typeformation.cf.Encoding._
 import io.circe.syntax._
 import typeformation.cf.syntax._
 import Condition._
-import typeformation.cf.iam.syntax._
+import typeformation.iam.syntax._
 
 class IamEncodingTest extends JsonTest {
   "IAM entities encoding" - {

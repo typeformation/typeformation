@@ -1,4 +1,4 @@
-package typeformation.cf
+package typeformation
 
 import enum.Enum
 

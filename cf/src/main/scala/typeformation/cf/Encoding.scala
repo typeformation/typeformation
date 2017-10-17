@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter
 
 import typeformation.cf.CfExp._
 import typeformation.cf.Parameter.{AwsParamType, CommaDelimited}
+import typeformation.iam
 import AwsParamType._
 import io.circe.syntax._
 import typeformation.cf.init._
@@ -353,8 +354,8 @@ object Encoding {
     }
   }
 
-  implicit val encodeIamCondition: Encoder[iam.Condition] = Encoder.instance {
-    c =>
+  implicit val encodeIamCondition: Encoder[iam.Condition] =
+    Encoder.instance { c =>
       val suffix = if (c.hasIfExists) "IfExists" else ""
       val labelWithModifiers =
         c.quantifier.fold[String](c.label)(q => s"${q.id}:${c.label}") ++ suffix
@@ -363,31 +364,33 @@ object Encoding {
         labelWithModifiers -> Json.obj(
           c.key.value -> unwrapSingleton(c.expressionEncoder(c.expected)))
       )
-  }
+    }
 
-  implicit val encodeStatement: Encoder[iam.Statement] = Encoder.instance { s =>
-    def invertibleKV[A: Encoder](key: String,
-                                 inv: iam.Invertible[A]): (String, Json) =
-      (if (inv.isPositive) key else s"Not$key") -> unwrapSingleton(
-        inv.value.asJson)
+  implicit val encodeStatement: Encoder[iam.Statement] =
+    Encoder.instance { s =>
+      def invertibleKV[A: Encoder](key: String,
+                                   inv: iam.Invertible[A]): (String, Json) =
+        (if (inv.isPositive) key else s"Not$key") -> unwrapSingleton(
+          inv.value.asJson)
 
-    Json.obj(
-      Seq(
-        "Sid" -> s.Sid.asJson,
-        "Effect" -> Json.fromString(iam.Effect.effectEnum.encode(s.Effect)),
-        invertibleKV("Resource", s.Resource),
-        invertibleKV("Action", s.Action),
-        "Condition" -> foldKeyVals(s.Condition)
-      ) ++ s.Principal
-        .map(p => Seq(invertibleKV("Principal", p)))
-        .getOrElse(Nil): _*)
-  }
+      Json.obj(
+        Seq(
+          "Sid" -> s.Sid.asJson,
+          "Effect" -> Json.fromString(iam.Effect.effectEnum.encode(s.Effect)),
+          invertibleKV("Resource", s.Resource),
+          invertibleKV("Action", s.Action),
+          "Condition" -> foldKeyVals(s.Condition)
+        ) ++ s.Principal
+          .map(p => Seq(invertibleKV("Principal", p)))
+          .getOrElse(Nil): _*)
+    }
 
-  implicit val encodePolicy: Encoder[iam.Policy] = Encoder.instance { p =>
-    Json.obj("Id" -> p.Id.asJson,
-             "Version" -> p.Version.asJson,
-             "Statement" -> p.Statement.asJson)
-  }
+  implicit val encodePolicy: Encoder[iam.Policy] =
+    Encoder.instance { p =>
+      Json.obj("Id" -> p.Id.asJson,
+               "Version" -> p.Version.asJson,
+               "Statement" -> p.Statement.asJson)
+    }
 
   private[cf] def unwrapSingleton(j: Json): Json =
     j.withArray(arr => if (arr.size == 1) arr.head else arr.asJson)

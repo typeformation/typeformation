@@ -1,10 +1,10 @@
-package typeformation.cf.iam.syntax
+package typeformation.iam.syntax
 import java.time.ZonedDateTime
 
 import io.circe.Encoder
 import typeformation.cf.Arn
-import typeformation.cf.iam.Condition
-import typeformation.cf.iam.Condition.Key
+import typeformation.iam.Condition
+import typeformation.iam.Condition.Key
 
 trait Conditions {
   private def strListCond(implicit ev: Encoder[List[String]]) =

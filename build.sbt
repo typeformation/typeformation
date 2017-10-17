@@ -19,6 +19,9 @@ lazy val commonSettings = Seq(
     "-Ywarn-value-discard"
   ),
   organization := "typeformation",
+  bintrayOrganization := Some("typeformation"),
+  version := "0.1.0",
+  licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-core",
     "io.circe" %% "circe-generic",

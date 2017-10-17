@@ -1,6 +1,6 @@
-package typeformation.cf.iam.syntax
+package typeformation.iam.syntax
 
-import typeformation.cf.iam.Invertible
+import typeformation.iam.Invertible
 import Invertible._
 
 trait Conversions {
