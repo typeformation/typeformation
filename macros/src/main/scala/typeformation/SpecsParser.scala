@@ -11,7 +11,9 @@ import scala.io.Source
 import scala.language.implicitConversions
 
 object SpecsParser {
-  implicit private val decodePrimitiveType = new Decoder[PrimitiveType] {
+  implicit private val decodePrimitiveType: Decoder[PrimitiveType] {
+    def apply(c: HCursor): Result[PrimitiveType]
+  } = new Decoder[PrimitiveType] {
     override def apply(c: HCursor): Result[PrimitiveType] =
       c.as[String].flatMap { s =>
         Either.fromOption(PrimitiveType.fromString(s), DecodingFailure(s"Unknown primitive type $s", c.history))
@@ -48,7 +50,7 @@ object SpecsParser {
     }
   }
 
-  private implicit val decodeTag = Decoder.instance[TagType.type] { c =>
+  private implicit val decodeTag: Decoder[typeformation.TagType.type] = Decoder.instance[TagType.type] { c =>
     c.as[String].ensure(DecodingFailure("Expected the string Tag", c.history))(_ == "Tag").map(_ => TagType)
   }
 
@@ -85,14 +87,20 @@ object SpecsParser {
       fqn.split("\\.").toList match {
         case List(namespace, name) =>
           c.get[List[Property]]("Properties")(decodeProperties(namespace)).map { props =>
-            Some(PropertyType(namespace, name, props))
-          }.orElse(Right(None))
+            Some(CustomPropertyType(namespace, name, props))
+          } orElse {
+            c.get[PrimitiveType]("PrimitiveType").right
+              .map(AliasPropertyType(namespace, name, _))
+              .map(Some(_))
+          }
         case List("Tag") =>
           Right(None)
       }
   }
 
-  implicit private val decodeResourceTypes = new Decoder[List[ResourceType]] {
+  implicit private val decodeResourceTypes: Decoder[List[ResourceType]] {
+    def apply(c: HCursor): Result[List[ResourceType]]
+  } = new Decoder[List[ResourceType]] {
     override def apply(c: HCursor): Result[List[ResourceType]] =
       c.downField("ResourceTypes").focus
         .flatMap(_.asObject).getOrElse(throw new Exception(s"Expected resource to be an object at ${c.history}"))
@@ -101,7 +109,9 @@ object SpecsParser {
       }
   }
 
-  implicit private val decodePropertyTypes = new Decoder[List[PropertyType]] {
+  implicit private val decodePropertyTypes: Decoder[List[PropertyType]] {
+    def apply(c: HCursor): Result[List[PropertyType]]
+  } = new Decoder[List[PropertyType]] {
     override def apply(c: HCursor): Result[List[PropertyType]] =
       c.downField("PropertyTypes").focus
         .flatMap(_.asObject).getOrElse(throw new Exception(s"Expected property to be an object at ${c.history}"))
