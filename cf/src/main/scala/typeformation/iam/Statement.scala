@@ -1,5 +1,6 @@
 package typeformation.iam
 import typeformation.cf.Arn
+import typeformation.iam.Invertible.Pos
 
 case class Statement(Effect: Effect,
                      Action: Invertible[Action],

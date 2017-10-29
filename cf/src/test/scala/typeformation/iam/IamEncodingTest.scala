@@ -98,6 +98,34 @@ class IamEncodingTest extends JsonTest {
         parse(s"""{"StringEqualsIfExists": {"ec2:InstanceType": "t1.*"}}"""))
     }
   }
+  "Invertible is supported" in {
+    val principal: Principal =
+      Principal.Aws(Arn("arn:aws:iam::444455556666:user/Bob"),
+                    Arn("arn:aws:iam::444455556666:root"))
+
+    val statement = Statement(
+      Effect = Effect.Deny,
+      Action = Action("*"),
+      Resource = List(Arn("*")),
+      Principal = Some(principal.neg)
+    )
+
+    Right(encode(statement)) should ===(
+      parse("""
+        | {
+        |  "Effect": "Deny",
+        |  "Action": "*",
+        |  "Resource": "*",
+        |  "NotPrincipal": {
+        |    "AWS": [
+        |      "arn:aws:iam::444455556666:user/Bob",
+        |      "arn:aws:iam::444455556666:root"
+        |    ]
+        |  }
+        |}
+        |
+      """.stripMargin))
+  }
   "Policies are supported" in {
     val policy =
       Policy(

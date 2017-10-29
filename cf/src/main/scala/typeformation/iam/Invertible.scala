@@ -17,11 +17,11 @@ object Invertible {
 
   trait IsInvertible[A]
   object IsInvertible {
-    implicit val actionIsInvertiblew: IsInvertible[Action] =
+    implicit val actionIsInvertible: IsInvertible[Action] =
       new IsInvertible[Action] {}
-    implicit val principalIsInvertiblew: IsInvertible[Principal] =
+    implicit val principalIsInvertible: IsInvertible[Principal] =
       new IsInvertible[Principal] {}
-    implicit val arnListInvertiblew: IsInvertible[List[Arn]] =
+    implicit val arnListInvertible: IsInvertible[List[Arn]] =
       new IsInvertible[List[Arn]] {}
   }
 }
