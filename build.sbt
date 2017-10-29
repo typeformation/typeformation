@@ -7,7 +7,6 @@ organization in ThisBuild := "typeformation"
 val circeVersion = "0.8.0"
 
 lazy val commonSettings = Seq(
-  resolvers += Resolver.bintrayRepo("scalameta", "maven"),
   scalacOptions ++= Seq(
     "-encoding", "UTF-8", // 2 args
     "-feature",
@@ -19,9 +18,12 @@ lazy val commonSettings = Seq(
     "-Ywarn-value-discard"
   ),
   organization := "typeformation",
+  version := "0.1.0",
+  licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-core",
     "io.circe" %% "circe-generic",
+    "io.circe" %% "circe-java8",
     "io.circe" %% "circe-parser"
   ).map(_ % circeVersion)
 )
