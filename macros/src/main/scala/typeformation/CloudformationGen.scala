@@ -5,7 +5,7 @@ import scala.meta._
 
 class CloudformationGen extends scala.annotation.StaticAnnotation {
   inline def apply(defn: Any): Any = meta {
-    val gen = new CodeGen(Config(excludePrefixes = Set("AWS::SSM")))
+    val gen = new CodeGen(Config())
 
     defn match {
       case q"object $_ {..$_}" =>
