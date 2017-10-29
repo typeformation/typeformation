@@ -17,21 +17,28 @@ class CodeGen(conf: CodeGen.Config) {
       val objectName = Term.Name(normalize(namespace))
       val typeName = Type.Name(normalize(namespace))
 
-      val classDefs = props.map { prop =>
-        val className = Type.Name(prop.name)
-        val properties = prop.properties.sortBy(_.required)(Ordering.Boolean.reverse).map(mkField(_, None))
-        q"case class $className (..$properties) extends ResourceProperty"
+      val classDefs = props.map {
+        case CustomPropertyType(_, name, ps) =>
+          val className = Type.Name(name)
+          val properties = ps.sortBy(_.required)(Ordering.Boolean.reverse).map(mkField(_, None))
+          q"case class $className (..$properties) extends ResourceProperty"
+        case AliasPropertyType(_, name, tpe) =>
+          val aliasName = Type.Name(name)
+          val typeName = t"CfExp[${mapPrimitiveType(tpe)}]"
+          q"type $aliasName = $typeName"
       }
 
-      val objDefs = props.map { prop =>
-        val objName = Term.Name(prop.name)
-        val typeName = Type.Name(prop.name)
+      val objDefs = props.collect {
+        case CustomPropertyType(_, name, _) =>
+          val objName = Term.Name(name)
+          val typeName = Type.Name(name)
 
-        q"""object $objName {
+          q"""object $objName {
               implicit val encoder: Encoder[$typeName] = deriveEncoder[$typeName]
             }
         """
       }
+
       val getAttInstances =
         ResourceAttSupport.attributesByResourceType
           .get(namespace).map(mkGetAttInstance)

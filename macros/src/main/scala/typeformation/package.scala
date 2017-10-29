@@ -1,6 +1,18 @@
 package object typeformation {
   type Namespace = String
-  case class PropertyType(namespace: Namespace, name: String, properties: List[Property])
+
+  /**
+    * PropertyType usually defines custom types, but sometimes merely aliases primitive types.
+    * This is seen for example on AWS::SSM::PatchBaseLine.PatchGroup
+    * In this case, while a custom PatchGroup property type is define, the documentation specify to use
+    * it as if it was a string
+    */
+  sealed trait PropertyType {
+    def namespace: Namespace
+    def name: String
+  }
+  case class AliasPropertyType(namespace: Namespace, name: String, primitiveType: PrimitiveType) extends PropertyType
+  case class CustomPropertyType(namespace: Namespace, name: String, properties: List[Property]) extends PropertyType
 
   sealed trait AwsType
   sealed trait PrimitiveType extends AwsType
