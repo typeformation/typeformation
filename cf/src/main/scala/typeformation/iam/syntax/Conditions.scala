@@ -129,4 +129,7 @@ trait Conditions {
 
   def arnNotLike(key: Key, exp: Arn)(implicit enc: Encoder[Arn]) =
     arnCond(enc)(key, exp, "ArnNotLike")
+
+  def isNull(key: Key, exp: Boolean)(implicit enc: Encoder[Boolean]) =
+    Condition.instance[Boolean](None, ifX = false)(key, exp)("Null")
 }
