@@ -385,12 +385,7 @@ object Encoding {
           .getOrElse(Nil): _*)
     }
 
-  implicit val encodePolicy: Encoder[iam.Policy] =
-    Encoder.instance { p =>
-      Json.obj("Id" -> p.Id.asJson,
-               "Version" -> p.Version.asJson,
-               "Statement" -> p.Statement.asJson)
-    }
+  implicit val encodePolicy: Encoder[iam.Policy] = deriveEncoder[iam.Policy]
 
   private[cf] def unwrapSingleton(j: Json): Json =
     j.withArray(arr => if (arr.size == 1) arr.head else arr.asJson)
