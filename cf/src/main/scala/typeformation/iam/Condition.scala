@@ -29,13 +29,9 @@ trait Condition {
 object Condition {
   case class Key(value: String)
 
-  type Aux[A] = Condition {
-    type Type = A
-  }
-
   private[iam] def instance[A: Encoder](q: Option[Quantifier], ifX: Boolean)(
       k: Key,
-      exp: A)(lbl: String): Condition.Aux[A] = new Condition {
+      exp: A)(lbl: String): Condition { type Type = A } = new Condition {
     override type Type = A
     override def key = k
     override val expected = exp
@@ -54,5 +50,4 @@ object Condition {
   case object ForAllValues extends Quantifier {
     override def id = "ForAllValues"
   }
-
 }
