@@ -106,7 +106,6 @@ class IamEncodingTest extends JsonTest {
     val statement = Statement(
       Effect = Effect.Deny,
       Action = Action("*"),
-      Resource = List(Arn("*")),
       Principal = Some(principal.neg)
     )
 
@@ -115,7 +114,6 @@ class IamEncodingTest extends JsonTest {
         | {
         |  "Effect": "Deny",
         |  "Action": "*",
-        |  "Resource": "*",
         |  "NotPrincipal": {
         |    "AWS": [
         |      "arn:aws:iam::444455556666:user/Bob",

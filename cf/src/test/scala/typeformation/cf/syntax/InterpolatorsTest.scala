@@ -65,8 +65,7 @@ CREATE USER '$DBUsername'@'localhost' IDENTIFIED BY '$DBPassword';""" should ===
   }
   "fnSub interpolator" - {
     val param = Parameter.Str("param")
-    implicit val resAttr =
-      ResourceAtt.mk[TestResource]("testAttr")
+    implicit val resAttr = ResourceAtt.mk[TestResource]("testAttr")
 
     "rejects non-token arguments" in {
       illTyped { """fnSub"$param and $resource and ${'notAToken}"""" }

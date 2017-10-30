@@ -380,12 +380,15 @@ object Encoding {
           invertibleKV("Resource", s.Resource),
           invertibleKV("Action", s.Action),
           "Condition" -> foldKeyVals(s.Condition)
-        ) ++ s.Principal
+        ).filterNot { case (_, json) => isEmptyArray(json) } ++ s.Principal
           .map(p => Seq(invertibleKV("Principal", p)))
           .getOrElse(Nil): _*)
     }
 
   implicit val encodePolicy: Encoder[iam.Policy] = deriveEncoder[iam.Policy]
+
+  private[cf] def isEmptyArray(j: Json): Boolean =
+    j.asArray.fold[Boolean](false)(_.isEmpty)
 
   private[cf] def unwrapSingleton(j: Json): Json =
     j.withArray(arr => if (arr.size == 1) arr.head else arr.asJson)
